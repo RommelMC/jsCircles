@@ -5,7 +5,6 @@
 <body>
 
 	Demonstrating how you can detect how long your mouse was clicked or held down.  Open your console to see how it works.
-
 	<script>
 	//using immediate function to avoid global variable issues
 	( function(){
@@ -22,6 +21,9 @@
 		}
 		document.onmouseup = function(e){
 			time_pressed = getTime() - mousedown_time;
+			var arr = [1,2,3];
+			delete arr[0];
+			console.log(typeof arr[0]);
 			console.log('You held your mouse down for', time_pressed, 'miliseconds.');
 		}
 

@@ -1,0 +1,319 @@
+<html>
+<head>
+	<title>Javascript Box - OOP demo</title>
+</head>
+<body>
+
+	<svg id="svg" xmlns="http://www.w3.org/2000/svg" width="window.innerWidth;" height ="window.innerHeight"></svg>
+
+	<script>
+	
+	function Circle(cx, cy, html_id,r)
+	{
+		this.idd = html_id;
+		this.info = { cx: cx,  cy: cy };
+		this.radius = r;
+		this.currColor = "fill: black";
+		//private function that generates a random number
+		var randomNumberBetween = function(min, max){
+			return Math.random()*(max-min) + min;
+		}
+
+		this.initialize = function(){
+			//give a random velocity for the circle
+			this.info.velocity = {
+				x: randomNumberBetween(-3,3),
+				y: randomNumberBetween(-3,3)
+			}
+
+			//create a circle 
+			var circle = makeSVG('circle', 
+				{ 	cx: this.info.cx,
+				  	cy: this.info.cy,
+				  	r:  this.radius,
+				  	id: html_id,
+				  	style: "fill: black"
+				});
+
+			document.getElementById('svg').appendChild(circle);
+		}
+
+		this.update = function(time)
+        {
+
+			// console.log("element by id: " + html_id);
+			var el = document.getElementById(html_id);
+			// console.log(el);
+
+			//see if the circle is going outside the browser. if it is, reverse the velocity
+			if( this.info.cx + this.radius >= window.innerWidth || this.info.cx <= this.radius)
+			{
+				this.info.velocity.x = this.info.velocity.x * -1;
+			}
+			if( this.info.cy + this.radius >= window.innerHeight || this.info.cy <= this.radius)
+			{
+				this.info.velocity.y = this.info.velocity.y * -1;
+			}
+
+			this.info.cx = this.info.cx + this.info.velocity.x*time;
+			this.info.cy = this.info.cy + this.info.velocity.y*time;
+
+			el.setAttribute("cx", this.info.cx);
+			el.setAttribute("cy", this.info.cy);
+		}
+
+		//creates the SVG element and returns it
+		var makeSVG = function(tag, attrs) {
+	        var el= document.createElementNS('http://www.w3.org/2000/svg', tag);
+            console.log(attrs);
+	        for (var k in attrs)
+	        {
+                console.log(k);
+                console.log(attrs[k]);
+
+	            el.setAttribute(k, attrs[k]);
+	        }
+	        return el;
+	    }
+
+	    this.initialize();
+	}
+
+    function removeBall(id, allCircles, freeIDs)
+    {
+        delete allCircles[id];
+        freeIDs.push(id);
+        var goodbye = document.getElementById(id);
+		goodbye.parentNode.removeChild(goodbye);
+    }
+
+	function disappear(c1, c2, allCircles, freeIDs)
+	{
+        if(Math.sqrt(Math.pow(c1.info.cx-c2.info.cx,2) + Math.pow(c1.info.cy-c2.info.cy,2)) < c1.radius+c2.radius)
+        {
+            removeBall(c1.idd, allCircles, freeIDs);
+            removeBall(c2.idd, allCircles, freeIDs);
+            return true;
+        }
+        return false;
+	}
+
+    function mergeBalls(c1, c2, allCircles, freeIDs)
+    {
+        var larger = c1;
+        var smallRadius = c2.radius;
+        if(c1.radius < c2.radius)
+        {
+            larger = c2;
+            smallRadius = c1.radius;
+        }
+        if(Math.sqrt(Math.pow(c1.info.cx-c2.info.cx,2) + Math.pow(c1.info.cy-c2.info.cy,2)) <= larger.radius)
+        {
+            if(larger == c1)
+                {removeBall(c2.idd, allCircles, freeIDs);}
+            else
+            {
+                removeBall(c1.idd, allCircles, freeIDs);
+                // smallRadius = c2.radius;
+            }
+            return [larger, smallRadius];
+        }
+        return [];
+    }
+
+    function bounce(c1, c2, allCircles, freeIDs)
+    {
+        if(Math.sqrt(Math.pow(c1.info.cx-c2.info.cx,2) + Math.pow(c1.info.cy-c2.info.cy,2)) <= c1.radius+c2.radius)
+        {
+            var r1 = c1.radius;
+            var r2 = c2.radius;
+            var v1 = c1.info.velocity.x;
+            c1.info.velocity.x = (((r1-r2)/(r1+r2))*c1.info.velocity.x) + ((2*r2/(r1+r2))*c2.info.velocity.x);
+            c2.info.velocity.x = (((r2-r1)/(r1+r2))*c2.info.velocity.x) + ((2*r1/(r1+r2))*v1);
+
+            v1 = c1.info.velocity.y;
+            c1.info.velocity.y = (((r1-r2)/(r1+r2))*c1.info.velocity.y) + ((2*r2/(r1+r2))*c2.info.velocity.y);
+            c2.info.velocity.y = (((r2-r1)/(r1+r2))*c2.info.velocity.y) + ((2*r1/(r1+r2))*v1);
+            return true;
+        }
+        return false;
+    }
+
+	function getColor()
+	{
+		var randomR = Math.floor(Math.random()*256);
+		var randomG = Math.floor(Math.random()*256);
+		var randomB = Math.floor(Math.random()*256);
+		var randomColor = "fill: rgb(" + randomR + "," + randomG + "," + randomB;
+
+		return randomColor;
+	}
+
+    function changeColor(c1, c2, allCircles, freeIDs)
+    {
+        if(bounce(c1,c2,allCircles,freeIDs))
+        {
+            var el = document.getElementById(c1.idd)
+			var randomColor = getColor();
+            if(el.getAttribute("style") != randomColor)
+                el.setAttribute("style", randomColor);
+            else
+			{
+				while(el.getAttribute("style") == randomColor)
+				{
+					randomColor = getColor();
+				}
+                el.setAttribute("style", randomColor);
+			}
+
+            el = document.getElementById(c2.idd)
+            var randomColor = getColor();
+            if(el.getAttribute("style") != randomColor)
+                el.setAttribute("style", randomColor);
+            else
+			{
+				while(el.getAttribute("style") == randomColor)
+				{
+					randomColor = getColor();
+				}
+                el.setAttribute("style", randomColor);
+			}
+
+            return true;
+        }
+        return false;
+    }
+
+    function combine(c1, c2, allCircles, freeIDs)
+    {
+        var pair = mergeBalls(c1, c2, allCircles, freeIDs);
+        if(pair.length != 0)
+        {
+            var el = document.getElementById(pair[0].idd);
+            // function slower(){
+            //         pair[0].radius++;
+            //         pair[1]--;
+            //         el.setAttribute("r", pair[0].radius);
+            //     }
+            // console.log(pair[0], pair[1]);
+
+            // var animated =document.createElementNS('http://www.w3.org/2000/svg', 'animate')
+            // animated.setAttribute("attributeType", "xml");
+            // animated.setAttribute("attributeName", "r");
+            // animated.setAttribute("from", pair[0].radius);
+            // animated.setAttribute("to", pair[0].radius+pair[1]);
+            // animated.setAttribute("dur", "2s");
+            // animated.setAttribute("repeatCount", 5);
+            // el.appendChild(animated);
+
+            // setTimeout(function(){pair[0].radius += pair[1]; el.removeChild(animated); el.setAttribute("r", pair[0].radius);}, 1000);
+
+            // pair[0].radius += pair[1];
+            // el.setAttribute("r", pair[0].radius);
+            // console.log(el.getAttribute("r"));
+            // el.removeChild(animated);
+            // console.log("ohp");
+            while(pair[1] > 0)
+            {
+                pair[0].radius+=.01;
+                pair[1]-=.01;
+                setTimeout(function(){
+                    el.setAttribute("r", pair[0].radius);
+                }, 1000);
+                // pair[0].radius+=.005;
+                // el.setAttribute("r", pair[0].radius);
+                // pair[1]-=.005;
+            }
+        }
+    }
+
+	function checkCollisions(allCircles, freeIDs)
+	{
+		// console.log("checking");
+		// console.log(allCircles[0]);
+		for(var i = 0; i < allCircles.length-1; i++)
+		{
+			if(typeof allCircles[i] === "undefined")
+				continue;
+			for(var j = i + 1; j < allCircles.length; j++)
+			{
+				if(typeof allCircles[j] === "undefined" || typeof allCircles[i] === "undefined")
+					continue;
+				var c1 = allCircles[i];
+				var c2 = allCircles[j];
+
+                // disappear(c1, c2, allCircles, freeIDs);
+                // mergeBalls(c1, c2, allCircles, freeIDs);
+				// bounce(c1, c2, allCircles, freeIDs);
+                changeColor(c1,c2,allCircles,freeIDs);
+                // combine(c1, c2, allCircles, freeIDs);
+
+			}
+		}
+	}
+
+	function PlayGround()
+	{
+		var counter = 0;  //counts the number of circles created
+		var circles = [ ]; //array that will hold all the circles created in the app
+		var freeIDs = [ ];
+		//a loop that updates the circle's position on the screen
+		this.loop = function(){
+			// checkCollisions(circles);
+			// counter = circles.length;
+			for(circle in circles)
+			{
+				if(circle != null)
+					circles[circle].update(1);
+			}
+			checkCollisions(circles, freeIDs);
+		}
+
+		this.createNewCircle = function(x,y,r){
+
+            //For disappear:
+			if(freeIDs.length != 0)
+			{
+				var replace = freeIDs[freeIDs.length-1];
+				// console.log(replace);
+				freeIDs.pop();
+				var new_circle = new Circle(x,y,replace,r);
+				circles[replace] = new_circle;
+			}
+			else
+			{
+				var new_circle = new Circle(x,y,counter++,r);
+				circles.push(new_circle);
+			}
+			// console.log('created a new circle!', new_circle);
+		}
+
+		//create one circle when the game starts
+		this.createNewCircle(document.body.clientWidth/2, document.body.clientHeight/2, 10);
+	}
+
+	var playground = new PlayGround();
+	setInterval(playground.loop, 15);
+
+
+	var mousedown_time;
+
+	function getTime(){
+		var date = new Date();
+		return date.getTime();
+	}
+
+	document.onmousedown = function(e){
+		mousedown_time = getTime();
+	}
+	document.onmouseup = function(e){
+		time_pressed = getTime() - mousedown_time;
+		var radius = 10 + (time_pressed/25);
+		playground.createNewCircle(e.x, e.y, radius);
+		// console.log('You held your mouse down for', time_pressed, 'miliseconds.');
+	}
+
+	</script>
+
+</body>
+</html>
