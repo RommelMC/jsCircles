@@ -197,16 +197,16 @@
             //     }
             // console.log(pair[0], pair[1]);
 
-            // var animated =document.createElementNS('http://www.w3.org/2000/svg', 'animate')
-            // animated.setAttribute("attributeType", "xml");
-            // animated.setAttribute("attributeName", "r");
-            // animated.setAttribute("from", pair[0].radius);
-            // animated.setAttribute("to", pair[0].radius+pair[1]);
-            // animated.setAttribute("dur", "2s");
-            // animated.setAttribute("repeatCount", 5);
-            // el.appendChild(animated);
+            var animated =document.createElementNS('http://www.w3.org/2000/svg', 'animate')
+            animated.setAttribute("attributeType", "xml");
+            animated.setAttribute("attributeName", "r");
+            animated.setAttribute("from", pair[0].radius);
+            animated.setAttribute("to", pair[0].radius+pair[1]);
+            animated.setAttribute("dur", "2s");
+            animated.setAttribute("repeatCount", 5);
+            el.appendChild(animated);
 
-            // setTimeout(function(){pair[0].radius += pair[1]; el.removeChild(animated); el.setAttribute("r", pair[0].radius);}, 1000);
+            setTimeout(function(){pair[0].radius += pair[1]; el.removeChild(animated); el.setAttribute("r", pair[0].radius);}, 1000);
 
             // pair[0].radius += pair[1];
             // el.setAttribute("r", pair[0].radius);
@@ -246,6 +246,8 @@
                 // mergeBalls(c1, c2, allCircles, freeIDs);
 				// bounce(c1, c2, allCircles, freeIDs);
                 changeColor(c1,c2,allCircles,freeIDs);
+
+				//FOR COMBINE: Couldn't get it to work but you can look at the function and see my attempts.
                 // combine(c1, c2, allCircles, freeIDs);
 
 			}
