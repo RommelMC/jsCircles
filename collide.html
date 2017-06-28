@@ -14,6 +14,8 @@
 		this.info = { cx: cx,  cy: cy };
 		this.radius = r;
 		this.currColor = "fill: black";
+		this.sizeGoal = r;
+		this.growing = false;
 		//private function that generates a random number
 		var randomNumberBetween = function(min, max){
 			return Math.random()*(max-min) + min;
@@ -60,17 +62,19 @@
 
 			el.setAttribute("cx", this.info.cx);
 			el.setAttribute("cy", this.info.cy);
+			if(this.radius < this.sizeGoal)
+			{
+				this.radius += 1;
+				el.setAttribute('r', this.radius);
+			}
+
 		}
 
 		//creates the SVG element and returns it
 		var makeSVG = function(tag, attrs) {
 	        var el= document.createElementNS('http://www.w3.org/2000/svg', tag);
-            console.log(attrs);
 	        for (var k in attrs)
 	        {
-                console.log(k);
-                console.log(attrs[k]);
-
 	            el.setAttribute(k, attrs[k]);
 	        }
 	        return el;
@@ -189,41 +193,7 @@
         var pair = mergeBalls(c1, c2, allCircles, freeIDs);
         if(pair.length != 0)
         {
-            var el = document.getElementById(pair[0].idd);
-            // function slower(){
-            //         pair[0].radius++;
-            //         pair[1]--;
-            //         el.setAttribute("r", pair[0].radius);
-            //     }
-            // console.log(pair[0], pair[1]);
-
-            var animated =document.createElementNS('http://www.w3.org/2000/svg', 'animate')
-            animated.setAttribute("attributeType", "xml");
-            animated.setAttribute("attributeName", "r");
-            animated.setAttribute("from", pair[0].radius);
-            animated.setAttribute("to", pair[0].radius+pair[1]);
-            animated.setAttribute("dur", "2s");
-            animated.setAttribute("repeatCount", 5);
-            el.appendChild(animated);
-
-            setTimeout(function(){pair[0].radius += pair[1]; el.removeChild(animated); el.setAttribute("r", pair[0].radius);}, 1000);
-
-            // pair[0].radius += pair[1];
-            // el.setAttribute("r", pair[0].radius);
-            // console.log(el.getAttribute("r"));
-            // el.removeChild(animated);
-            // console.log("ohp");
-            while(pair[1] > 0)
-            {
-                pair[0].radius+=.01;
-                pair[1]-=.01;
-                setTimeout(function(){
-                    el.setAttribute("r", pair[0].radius);
-                }, 1000);
-                // pair[0].radius+=.005;
-                // el.setAttribute("r", pair[0].radius);
-                // pair[1]-=.005;
-            }
+			pair[0].sizeGoal += pair[1];
         }
     }
 
@@ -245,14 +215,13 @@
                 // disappear(c1, c2, allCircles, freeIDs);
                 // mergeBalls(c1, c2, allCircles, freeIDs);
 				// bounce(c1, c2, allCircles, freeIDs);
-                changeColor(c1,c2,allCircles,freeIDs);
-
-				//FOR COMBINE: Couldn't get it to work but you can look at the function and see my attempts.
-                // combine(c1, c2, allCircles, freeIDs);
+                // changeColor(c1,c2,allCircles,freeIDs);
+                combine(c1, c2, allCircles, freeIDs);
 
 			}
 		}
 	}
+
 
 	function PlayGround()
 	{
@@ -268,6 +237,7 @@
 				if(circle != null)
 					circles[circle].update(1);
 			}
+			// updateSize(circles);
 			checkCollisions(circles, freeIDs);
 		}
 
@@ -314,6 +284,10 @@
 		playground.createNewCircle(e.x, e.y, radius);
 		// console.log('You held your mouse down for', time_pressed, 'miliseconds.');
 	}
+
+	// document.onmousemove = function(e){
+	// 	console.log(e.x);
+	// }
 
 	</script>
 
